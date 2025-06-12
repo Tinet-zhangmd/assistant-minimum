@@ -1,4 +1,4 @@
-package com.assistantminimum
+package com.zhangmd.assistantminimum
 
 import android.os.Build
 import android.os.Bundle

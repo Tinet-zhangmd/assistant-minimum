@@ -1,4 +1,4 @@
-package com.assistantminimum
+package com.zhangmd.assistantminimum
 
 import android.app.Application
 import android.content.res.Configuration

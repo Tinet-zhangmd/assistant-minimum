@@ -349,12 +349,14 @@
 					"-lc++",
 				);
 				OTHER_SWIFT_FLAGS = "$(inherited) -D EXPO_CONFIGURATION_DEBUG";
-				PRODUCT_BUNDLE_IDENTIFIER = org.name.assistantminimum;
-				PRODUCT_NAME = assistantminimum;
+				PRODUCT_BUNDLE_IDENTIFIER = "com.zhangmd.assistantminimum";
+				PRODUCT_NAME = "assistantminimum";
 				SWIFT_OBJC_BRIDGING_HEADER = "assistantminimum/assistantminimum-Bridging-Header.h";
 				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
 				SWIFT_VERSION = 5.0;
 				VERSIONING_SYSTEM = "apple-generic";
+				TARGETED_DEVICE_FAMILY = "1";
+				CODE_SIGN_ENTITLEMENTS = assistantminimum/assistantminimum.entitlements;
 			};
 			name = Debug;
 		};
@@ -378,11 +380,13 @@
 					"-lc++",
 				);
 				OTHER_SWIFT_FLAGS = "$(inherited) -D EXPO_CONFIGURATION_RELEASE";
-				PRODUCT_BUNDLE_IDENTIFIER = org.name.assistantminimum;
-				PRODUCT_NAME = assistantminimum;
+				PRODUCT_BUNDLE_IDENTIFIER = "com.zhangmd.assistantminimum";
+				PRODUCT_NAME = "assistantminimum";
 				SWIFT_OBJC_BRIDGING_HEADER = "assistantminimum/assistantminimum-Bridging-Header.h";
 				SWIFT_VERSION = 5.0;
 				VERSIONING_SYSTEM = "apple-generic";
+				TARGETED_DEVICE_FAMILY = "1";
+				CODE_SIGN_ENTITLEMENTS = assistantminimum/assistantminimum.entitlements;
 			};
 			name = Release;
 		};

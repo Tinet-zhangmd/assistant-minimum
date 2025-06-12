@@ -2,6 +2,12 @@
   "expo": {
     "name": "assistant-minimum",
     "slug": "assistant-minimum",
-    "version": "1.0.0"
+    "version": "1.0.0",
+    "android": {
+      "package": "com.zhangmd.assistantminimum"
+    },
+    "ios": {
+      "bundleIdentifier": "com.zhangmd.assistantminimum"
+    }
   }
 }
