@@ -6,6 +6,7 @@ import { ThemeProvider, createTheme, Text, Icon } from '@rneui/themed';
 import HomeScreen from './src/screens/HomeScreen';
 import CallScreen from './src/screens/CallScreen';
 import { RootStackParamList } from './src/types/navigation';
+import { CallOverlay } from './src/components/CallOverlay';
 
 type NavigationProps = NativeStackNavigationProp<RootStackParamList>;
 
@@ -118,6 +119,7 @@ const App: React.FC = () => {
             component={CallScreenWithNavigation}
           />
         </Stack.Navigator>
+        <CallOverlay />
       </NavigationContainer>
     </ThemeProvider>
   );
