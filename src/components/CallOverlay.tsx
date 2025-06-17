@@ -2,11 +2,30 @@ import React from 'react';
 import { View, StyleSheet, TouchableOpacity } from 'react-native';
 import { Text, Icon } from '@rneui/themed';
 import { useCallStore } from '../store/callStore';
+import { useNavigation } from '@react-navigation/native';
+import { NativeStackNavigationProp } from '@react-navigation/native-stack';
+import { RootStackParamList } from '../types/navigation';
+
+type NavigationProps = NativeStackNavigationProp<RootStackParamList>;
 
 export const CallOverlay: React.FC = () => {
-  const { isInCall, customerName, phoneNumber, endCall, peerIds, isMuted } = useCallStore();
+  const navigation = useNavigation<NavigationProps>();
+  const { 
+    isCallActive,
+    customerName, 
+    phoneNumber, 
+    endCall, 
+    isMuted,
+    remoteUserJoined,
+    toggleMute 
+  } = useCallStore();
 
-  if (!isInCall) return null;
+  const handleEndCall = async () => {
+    await endCall();
+    navigation.navigate('Home');
+  };
+
+  if (!isCallActive) return null;
 
   return (
     <View style={styles.container}>
@@ -42,19 +61,19 @@ export const CallOverlay: React.FC = () => {
 
         <View style={styles.infoContainer}>
           <Text style={styles.status}>
-            {peerIds.length > 0 ? '通话中' : '等待对方接听...'}
+            {remoteUserJoined ? '通话中' : '等待对方接听...'}
           </Text>
-          {peerIds.map((peerId) => (
-            <View key={peerId} style={styles.peerContainer}>
-              <Text style={styles.peerInfo}>远端用户已加入 (ID: {peerId})</Text>
+          {remoteUserJoined && (
+            <View style={styles.peerContainer}>
+              <Text style={styles.peerInfo}>远端用户已加入</Text>
             </View>
-          ))}
+          )}
         </View>
 
         <View style={styles.buttonContainer}>
           <TouchableOpacity 
             style={[styles.button, styles.muteButton]}
-            onPress={useCallStore.getState().toggleMute}
+            onPress={toggleMute}
           >
             <Text style={styles.buttonText}>
               {isMuted ? '取消静音' : '静音'}
@@ -62,7 +81,7 @@ export const CallOverlay: React.FC = () => {
           </TouchableOpacity>
           <TouchableOpacity 
             style={styles.endCallButton}
-            onPress={endCall}
+            onPress={handleEndCall}
           >
             <Text style={styles.endCallText}>结束通话</Text>
           </TouchableOpacity>
@@ -204,14 +223,14 @@ const styles = StyleSheet.create({
     marginBottom: 20,
   },
   peerContainer: {
-    backgroundColor: 'rgba(255, 255, 255, 0.1)',
+    backgroundColor: 'rgba(0, 102, 255, 0.1)',
     padding: 10,
     borderRadius: 8,
     marginBottom: 10,
     width: '100%',
   },
   peerInfo: {
-    color: 'white',
+    color: '#0066FF',
     fontSize: 14,
     textAlign: 'center',
   },

@@ -1,18 +1,21 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { View, StyleSheet, TouchableOpacity } from 'react-native';
 import { NavigationContainer, useNavigation } from '@react-navigation/native';
 import { createNativeStackNavigator, NativeStackNavigationProp, NativeStackScreenProps } from '@react-navigation/native-stack';
 import { ThemeProvider, createTheme, Text, Icon } from '@rneui/themed';
-import HomeScreen from './src/screens/HomeScreen';
-import CallScreen from './src/screens/CallScreen';
+import { HomeScreen } from './src/screens/HomeScreen';
+import { CallScreen } from './src/screens/CallScreen';
 import { RootStackParamList } from './src/types/navigation';
 import { CallOverlay } from './src/components/CallOverlay';
+import { IncomingCallScreen } from './src/components/IncomingCallScreen';
+import { socketService } from './src/services/socketService';
+import { useCallStore } from './src/store/callStore';
 
 type NavigationProps = NativeStackNavigationProp<RootStackParamList>;
 
 const Stack = createNativeStackNavigator<RootStackParamList>();
 
-const Header: React.FC = () => (
+const Header = () => (
   <View style={styles.header}>
     <View style={styles.headerLeft}>
       <Icon name="phone" type="feather" color="#fff" size={20} style={styles.headerIcon} />
@@ -35,16 +38,9 @@ const Header: React.FC = () => (
   </View>
 );
 
-const NavigationBar: React.FC = () => {
+const NavigationBar = () => {
   const navigation = useNavigation<NavigationProps>();
   
-  const navigateToCall = () => {
-    navigation.navigate('Call', {
-      customerName: '张三',
-      phoneNumber: '13800138000'
-    });
-  };
-
   return (
     <View style={styles.toolbar}>
       <TouchableOpacity 
@@ -53,10 +49,7 @@ const NavigationBar: React.FC = () => {
       >
         <Icon name="user" type="feather" color="#666" size={20} />
       </TouchableOpacity>
-      <TouchableOpacity 
-        style={styles.toolbarItem}
-        onPress={navigateToCall}
-      >
+      <TouchableOpacity style={styles.toolbarItem}>
         <Icon name="message-square" type="feather" color="#666" size={20} />
       </TouchableOpacity>
       <TouchableOpacity style={styles.toolbarItem}>
@@ -75,33 +68,32 @@ const NavigationBar: React.FC = () => {
   );
 };
 
-const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => (
-  <View style={styles.container}>
-    <Header />
-    <View style={styles.content}>
-      {children}
+const HomeScreenWithLayout = (props: NativeStackScreenProps<RootStackParamList, 'Home'>) => {
+  return (
+    <View style={styles.container}>
+      <Header />
+      <View style={styles.content}>
+        <HomeScreen {...props} />
+      </View>
+      <NavigationBar />
     </View>
-    <NavigationBar />
-  </View>
-);
+  );
+};
 
-function NavigationScreenWrapper<T extends keyof RootStackParamList>(
-  WrappedComponent: React.ComponentType<NativeStackScreenProps<RootStackParamList, T>>,
-  screenName: T
-) {
-  return function NavigationScreen(props: NativeStackScreenProps<RootStackParamList, T>) {
-    return (
-      <Layout>
-        <WrappedComponent {...props} />
-      </Layout>
-    );
-  };
-}
+const App = () => {
+  useEffect(() => {
+    // 初始化 Socket.IO 连接
+    const socket = socketService.connect();
 
-const HomeScreenWithNavigation = NavigationScreenWrapper(HomeScreen, 'Home');
-const CallScreenWithNavigation = NavigationScreenWrapper(CallScreen, 'Call');
+    // 初始化语音引擎
+    useCallStore.getState().initEngine();
 
-const App: React.FC = () => {
+    return () => {
+      // 清理连接
+      socketService.disconnect();
+    };
+  }, []);
+
   return (
     <ThemeProvider theme={theme}>
       <NavigationContainer>
@@ -112,14 +104,15 @@ const App: React.FC = () => {
         >
           <Stack.Screen
             name="Home"
-            component={HomeScreenWithNavigation}
+            component={HomeScreenWithLayout}
           />
           <Stack.Screen
             name="Call"
-            component={CallScreenWithNavigation}
+            component={CallScreen}
           />
         </Stack.Navigator>
         <CallOverlay />
+        <IncomingCallScreen />
       </NavigationContainer>
     </ThemeProvider>
   );
@@ -174,7 +167,6 @@ const styles = StyleSheet.create({
     flex: 1,
     alignItems: 'center',
     justifyContent: 'center',
-    height: '100%',
   },
 });
 

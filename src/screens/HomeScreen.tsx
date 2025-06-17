@@ -1,10 +1,12 @@
 import React, { useEffect } from 'react';
-import { View, StyleSheet, RefreshControl, FlatList } from 'react-native';
+import { View, StyleSheet, RefreshControl, FlatList, TouchableOpacity } from 'react-native';
 import { Text } from '@rneui/themed';
-import { NativeStackScreenProps } from '@react-navigation/native-stack';
+import { NativeStackScreenProps, NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { RootStackParamList } from '../types/navigation';
+import { useNavigation } from '@react-navigation/native';
 
 type Props = NativeStackScreenProps<RootStackParamList, 'Home'>;
+type NavigationProps = NativeStackNavigationProp<RootStackParamList>;
 
 // 临时数据
 const mockTasks = [
@@ -24,8 +26,9 @@ const mockTasks = [
   },
 ];
 
-const HomeScreen: React.FC<Props> = () => {
+export const HomeScreen: React.FC<Props> = () => {
   const [refreshing, setRefreshing] = React.useState<boolean>(false);
+  const navigation = useNavigation<NavigationProps>();
 
   const onRefresh = React.useCallback(() => {
     setRefreshing(true);
@@ -35,21 +38,30 @@ const HomeScreen: React.FC<Props> = () => {
     }, 1000);
   }, []);
 
+  const handleCardPress = (customerName: string, phoneNumber: string) => {
+    navigation.navigate('Call', { customerName, phoneNumber });
+  };
+
   const renderTaskCard = ({ item }: { item: any }) => (
-    <View style={styles.card}>
-      <View style={styles.cardHeader}>
-        <View style={styles.nameContainer}>
-          <Text style={styles.name}>{item.customerName}</Text>
-          <View style={styles.priorityTag}>
-            <Text style={styles.priorityText}>{item.priority}优先级</Text>
+    <TouchableOpacity 
+      style={styles.cardContainer}
+      onPress={() => handleCardPress(item.customerName, item.phoneNumber)}
+    >
+      <View style={styles.card}>
+        <View style={styles.cardHeader}>
+          <View style={styles.nameContainer}>
+            <Text style={styles.name}>{item.customerName}</Text>
+            <View style={styles.priorityTag}>
+              <Text style={styles.priorityText}>{item.priority}</Text>
+            </View>
           </View>
         </View>
+        <View style={styles.phoneContainer}>
+          <Text style={styles.phone}>{item.phoneNumber}</Text>
+        </View>
+        <Text style={styles.description}>{item.description}</Text>
       </View>
-      <View style={styles.phoneContainer}>
-        <Text style={styles.phone}>{item.phoneNumber}</Text>
-      </View>
-      <Text style={styles.description}>{item.description}</Text>
-    </View>
+    </TouchableOpacity>
   );
 
   return (
@@ -95,13 +107,21 @@ const styles = StyleSheet.create({
   listContainer: {
     padding: 12,
   },
+  cardContainer: {
+    marginBottom: 16,
+  },
   card: {
     backgroundColor: '#fff',
     borderRadius: 8,
     padding: 16,
-    marginBottom: 12,
-    borderWidth: 1,
-    borderColor: '#f0f0f0',
+    shadowColor: '#000',
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 3,
   },
   cardHeader: {
     flexDirection: 'row',
@@ -143,6 +163,4 @@ const styles = StyleSheet.create({
     fontSize: 14,
     lineHeight: 20,
   },
-});
-
-export default HomeScreen; 
+}); 

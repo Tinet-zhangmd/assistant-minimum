@@ -11,15 +11,17 @@ import {
   AudioScenarioType,
 } from 'react-native-agora';
 import { PermissionsAndroid, Platform } from 'react-native';
+import { socketService } from '../services/socketService';
 
 interface CallState {
-  isInCall: boolean;
+  isCallActive: boolean;
+  isMuted: boolean;
+  remoteUserJoined: boolean;
   customerName: string;
   phoneNumber: string;
   engine: IRtcEngine | null;
-  joinChannelSuccess: boolean;
-  peerIds: number[];
-  isMuted: boolean;
+  currentCallId: string | null;
+  isIncomingCall: boolean;
 }
 
 interface CallActions {
@@ -27,6 +29,10 @@ interface CallActions {
   startCall: (customerName: string, phoneNumber: string) => Promise<void>;
   endCall: () => Promise<void>;
   toggleMute: () => Promise<void>;
+  setRemoteUserJoined: (joined: boolean) => void;
+  handleIncomingCall: (callId: string, customerName: string, phoneNumber: string) => void;
+  acceptIncomingCall: () => void;
+  rejectIncomingCall: () => void;
 }
 
 const config = {
@@ -59,13 +65,14 @@ const requestMicrophonePermission = async () => {
 };
 
 export const useCallStore = create<CallState & CallActions>((set, get) => ({
-  isInCall: false,
+  isCallActive: false,
+  isMuted: false,
+  remoteUserJoined: false,
   customerName: '',
   phoneNumber: '',
   engine: null,
-  joinChannelSuccess: false,
-  peerIds: [],
-  isMuted: false,
+  currentCallId: null,
+  isIncomingCall: false,
 
   initEngine: async () => {
     if (!get().engine) {
@@ -98,21 +105,14 @@ export const useCallStore = create<CallState & CallActions>((set, get) => ({
         // 配置声网事件监听
         engine.addListener('onJoinChannelSuccess', (connection: RtcConnection, elapsed: number) => {
           console.log('JoinChannelSuccess', connection.channelId, elapsed);
-          set({ joinChannelSuccess: true });
         });
 
         engine.addListener('onUserJoined', (connection: RtcConnection, remoteUid: number, elapsed: number) => {
           console.log('UserJoined', remoteUid, elapsed);
-          set(state => ({
-            peerIds: [...state.peerIds, remoteUid]
-          }));
         });
 
         engine.addListener('onUserOffline', (connection: RtcConnection, remoteUid: number, reason: UserOfflineReasonType) => {
           console.log('UserOffline', remoteUid, reason);
-          set(state => ({
-            peerIds: state.peerIds.filter(id => id !== remoteUid)
-          }));
         });
 
         engine.addListener('onError', (error: number) => {
@@ -139,20 +139,11 @@ export const useCallStore = create<CallState & CallActions>((set, get) => ({
     }
 
     try {
-      // 设置频道媒体选项
-      const options: ChannelMediaOptions = {
-        channelProfile: ChannelProfileType.ChannelProfileCommunication,
-        clientRoleType: ClientRoleType.ClientRoleBroadcaster,
-        publishMicrophoneTrack: true,
-        autoSubscribeAudio: true,
-        enableAudioRecordingOrPlayout: true,
-      };
+      // 通过 Socket.IO 发起呼叫
+      socketService.initiateCall(phoneNumber, customerName);
 
-      // 加入频道
-      await get().engine?.joinChannel(config.token, config.channelName, config.uid, options);
-      
       set({
-        isInCall: true,
+        isCallActive: true,
         customerName,
         phoneNumber,
       });
@@ -162,17 +153,23 @@ export const useCallStore = create<CallState & CallActions>((set, get) => ({
   },
 
   endCall: async () => {
-    const { engine } = get();
+    const { engine, currentCallId } = get();
     if (engine) {
       try {
         await engine.leaveChannel();
+        
+        // 通知服务器通话结束
+        if (currentCallId) {
+          socketService.endCall(currentCallId);
+        }
+
         set({
-          isInCall: false,
+          isCallActive: false,
+          remoteUserJoined: false,
           customerName: '',
           phoneNumber: '',
-          joinChannelSuccess: false,
-          peerIds: [],
-          isMuted: false,
+          currentCallId: null,
+          isIncomingCall: false,
         });
       } catch (error) {
         console.error('Failed to end call:', error);
@@ -189,6 +186,43 @@ export const useCallStore = create<CallState & CallActions>((set, get) => ({
       } catch (error) {
         console.error('Failed to toggle mute:', error);
       }
+    }
+  },
+
+  setRemoteUserJoined: (joined) => set({
+    remoteUserJoined: joined,
+  }),
+
+  handleIncomingCall: (callId: string, customerName: string, phoneNumber: string) => {
+    set({
+      currentCallId: callId,
+      customerName,
+      phoneNumber,
+      isIncomingCall: true,
+    });
+  },
+
+  acceptIncomingCall: () => {
+    const { currentCallId } = get();
+    if (currentCallId) {
+      socketService.acceptCall(currentCallId);
+      set({
+        isCallActive: true,
+        isIncomingCall: false,
+      });
+    }
+  },
+
+  rejectIncomingCall: () => {
+    const { currentCallId } = get();
+    if (currentCallId) {
+      socketService.rejectCall(currentCallId);
+      set({
+        currentCallId: null,
+        customerName: '',
+        phoneNumber: '',
+        isIncomingCall: false,
+      });
     }
   },
 })); 

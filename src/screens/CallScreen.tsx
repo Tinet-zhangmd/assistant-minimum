@@ -1,34 +1,24 @@
-import React from 'react';
-import { View, StyleSheet, TouchableOpacity } from 'react-native';
-import { Text, Icon } from '@rneui/themed';
+import React, { useEffect } from 'react';
+import { View, StyleSheet } from 'react-native';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { RootStackParamList } from '../types/navigation';
 import { useCallStore } from '../store/callStore';
+import { CallOverlay } from '../components/CallOverlay';
 
 type Props = NativeStackScreenProps<RootStackParamList, 'Call'>;
 
-const CallScreen: React.FC<Props> = ({ route }) => {
+export const CallScreen: React.FC<Props> = ({ route }) => {
   const { customerName, phoneNumber } = route.params;
-  const { startCall } = useCallStore();
+  const startCall = useCallStore(state => state.startCall);
 
-  const handleStartCall = async () => {
-    await startCall(customerName, phoneNumber);
-  };
+  useEffect(() => {
+    // 进入页面时自动开始通话
+    startCall(customerName, phoneNumber);
+  }, [customerName, phoneNumber]);
 
   return (
     <View style={styles.container}>
-      <View style={styles.customerInfo}>
-        <Text style={styles.name}>{customerName}</Text>
-        <Text style={styles.phone}>{phoneNumber}</Text>
-      </View>
-
-      <TouchableOpacity 
-        style={styles.callButton}
-        onPress={handleStartCall}
-      >
-        <Icon name="phone" type="feather" color="#fff" size={16} style={styles.callIcon} />
-        <Text style={styles.callButtonText}>开始通话</Text>
-      </TouchableOpacity>
+      <CallOverlay />
     </View>
   );
 };
@@ -36,40 +26,6 @@ const CallScreen: React.FC<Props> = ({ route }) => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#fff',
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  customerInfo: {
-    alignItems: 'center',
-    marginBottom: 32,
-  },
-  name: {
-    fontSize: 24,
-    fontWeight: '600',
-    color: '#333',
-    marginBottom: 8,
-  },
-  phone: {
-    fontSize: 16,
-    color: '#666',
-  },
-  callButton: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: '#4CD964',
-    paddingHorizontal: 32,
-    paddingVertical: 12,
-    borderRadius: 24,
-  },
-  callIcon: {
-    marginRight: 8,
-  },
-  callButtonText: {
-    color: '#fff',
-    fontSize: 16,
-    fontWeight: '600',
+    backgroundColor: '#000',
   },
 });
-
-export default CallScreen;
