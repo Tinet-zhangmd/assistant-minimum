@@ -1,6 +1,8 @@
 import React, { useState } from 'react';
 import { View, Text, TextInput, TouchableOpacity, StyleSheet, ScrollView } from 'react-native';
 import { Icon } from '@rneui/themed';
+import { useNavigation } from '@react-navigation/native';
+import HistorySummaryModal from '../components/HistorySummaryModal';
 
 const DIAL_KEYS = [
   ['1', '2', '3'],
@@ -22,6 +24,8 @@ function isValidPhone(phone: string) {
 
 export default function PhoneScreen() {
   const [phone, setPhone] = useState('');
+  const [modalVisible, setModalVisible] = useState(false);
+  const navigation = useNavigation();
 
   const handleDial = (key: string) => {
     setPhone((prev) => prev + key);
@@ -31,13 +35,22 @@ export default function PhoneScreen() {
 
   const handleCall = () => {
     if (isValidPhone(phone)) {
-      // 跳转到通话页面（RTC页面），这里建议用导航跳转
-      // navigation.navigate('CallSession', { phone });
+      setModalVisible(true);
     }
   };
 
   return (
     <View style={{flex: 1, backgroundColor: '#fafbfc'}}>
+      <HistorySummaryModal
+        visible={modalVisible}
+        onClose={() => setModalVisible(false)}
+        onConfirm={() => {
+          setModalVisible(false);
+          navigation.navigate('CallSession', { phone });
+        }}
+        phone={phone}
+        callCount={3}
+      />
       <View style={styles.titleBar}>
         <Text style={styles.title}>电话外呼</Text>
       </View>
