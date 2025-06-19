@@ -1,10 +1,11 @@
-import React, { useEffect } from 'react';
-import { View, Text, StyleSheet, FlatList, TouchableOpacity, ActivityIndicator } from 'react-native';
+import React, { useEffect, useState } from 'react';
+import { View, Text, StyleSheet, FlatList, TouchableOpacity, ActivityIndicator, Modal, Animated, Dimensions, Pressable } from 'react-native';
 import { Icon, Overlay, ListItem } from '@rneui/themed';
 import { useCallRecordStore } from '../store/callRecordStore';
 import type { CallRecord, CallStatus, CallRecordFilter } from '../types/callRecord';
 import { useNavigation } from '@react-navigation/native';
 import DropdownSelect, { DropdownOption } from '../components/DropdownSelect';
+import CallRecordDetailModal from './CallRecordDetailScreen';
 
 const STATUS_OPTIONS: DropdownOption[] = [
   { label: '全部', value: undefined },
@@ -33,6 +34,10 @@ export default function RecordsScreen() {
     records, total, page, pageSize, loading, filter,
     loadRecords, setFilter, resetFilter
   } = useCallRecordStore();
+
+  const [detailVisible, setDetailVisible] = useState(false);
+  const [selectedRecord, setSelectedRecord] = useState<CallRecord | null>(null);
+  const [slideAnim] = useState(new Animated.Value(0));
 
   useEffect(() => {
     loadRecords(1);
@@ -64,10 +69,26 @@ export default function RecordsScreen() {
     resetFilter();
   };
 
-  // 跳转详情
+  // 打开详情弹窗
   const handleRecordPress = (item: CallRecord) => {
-    // @ts-ignore
-    navigation.navigate('CallRecordDetail' as never, { recordId: item.id } as never);
+    setSelectedRecord(item);
+    setDetailVisible(true);
+    Animated.timing(slideAnim, {
+      toValue: 1,
+      duration: 300,
+      useNativeDriver: true,
+    }).start();
+  };
+  // 关闭详情弹窗
+  const handleCloseDetail = () => {
+    Animated.timing(slideAnim, {
+      toValue: 0,
+      duration: 200,
+      useNativeDriver: true,
+    }).start(() => {
+      setDetailVisible(false);
+      setSelectedRecord(null);
+    });
   };
 
   // 分页切换
@@ -101,6 +122,14 @@ export default function RecordsScreen() {
       </View>
     </TouchableOpacity>
   );
+
+  // 弹窗高度
+  const windowHeight = Dimensions.get('window').height;
+  const modalHeight = windowHeight * 0.92;
+  const translateY = slideAnim.interpolate({
+    inputRange: [0, 1],
+    outputRange: [modalHeight, 0],
+  });
 
   return (
     <View style={{ flex: 1, backgroundColor: '#f6f8fa' }}>
@@ -171,6 +200,22 @@ export default function RecordsScreen() {
           <Text style={[styles.pageBtnText, page === totalPages && { color: '#ccc' }]}>下一页</Text>
         </TouchableOpacity>
       </View>
+      <Modal
+        visible={detailVisible}
+        transparent
+        animationType="none"
+        onRequestClose={handleCloseDetail}
+      >
+        <Pressable style={styles.modalMask} onPress={handleCloseDetail} />
+        <Animated.View style={[styles.modalContent, { height: modalHeight, transform: [{ translateY }] }]}> 
+          {selectedRecord && (
+            <CallRecordDetailModal
+              record={selectedRecord}
+              onClose={handleCloseDetail}
+            />
+          )}
+        </Animated.View>
+      </Modal>
     </View>
   );
 }
@@ -393,5 +438,23 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     marginBottom: 4,
     marginLeft: 4,
+  },
+  modalMask: {
+    flex: 1,
+    backgroundColor: 'rgba(0,0,0,0.18)',
+  },
+  modalContent: {
+    position: 'absolute',
+    left: 0,
+    right: 0,
+    bottom: 0,
+    backgroundColor: '#f6f8fa',
+    borderTopLeftRadius: 24,
+    borderTopRightRadius: 24,
+    overflow: 'hidden',
+    elevation: 8,
+    shadowColor: '#000',
+    shadowOpacity: 0.12,
+    shadowRadius: 12,
   },
 });

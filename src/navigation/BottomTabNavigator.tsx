@@ -3,8 +3,8 @@ import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { Icon } from '@rneui/themed';
 import PhoneScreen from '../screens/PhoneScreen';
 import RecordsScreen from '../screens/RecordsScreen';
-// 下面三个页面可先用占位组件
-const DashboardScreen = () => <></>;
+import DashboardScreen from '../screens/DashboardScreen';
+// 下面的页面可先用占位组件
 const ProfileScreen = () => <></>;
 
 const Tab = createBottomTabNavigator();
