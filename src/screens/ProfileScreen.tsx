@@ -1,7 +1,12 @@
 import React from 'react';
-import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, Alert } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Icon } from '@rneui/themed';
+import { useCallStore } from '../store/callStore';
+import { useNavigation } from '@react-navigation/native';
+import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
+import { RootStackParamList } from '../types/navigation';
+import { socketService } from '../services/socketService';
 
 // Mock数据
 const USER_INFO = {
@@ -18,9 +23,36 @@ const SYSTEM_INFO = {
 };
 
 const ProfileScreen: React.FC = () => {
-  const handleLogout = () => {
-    // TODO: 实现退出登录逻辑
-    console.log('退出登录');
+  const navigation = useNavigation<NativeStackNavigationProp<RootStackParamList>>();
+  const { isCallActive, endCall } = useCallStore();
+
+  const handleLogout = async () => {
+    if (isCallActive) {
+      Alert.alert(
+        '退出提醒',
+        '您当前正在通话中，退出登录将结束当前通话。是否继续？',
+        [
+          {
+            text: '取消',
+            style: 'cancel',
+          },
+          {
+            text: '确定退出',
+            style: 'destructive',
+            onPress: async () => {
+              await endCall();
+              socketService.disconnect();
+              // TODO: 实现退出登录逻辑
+              console.log('退出登录');
+            },
+          },
+        ],
+      );
+    } else {
+      socketService.disconnect();
+      // TODO: 实现退出登录逻辑
+      console.log('退出登录');
+    }
   };
 
   return (
@@ -62,7 +94,10 @@ const ProfileScreen: React.FC = () => {
       </View>
 
       {/* 退出登录按钮 */}
-      <TouchableOpacity style={styles.logoutButton} onPress={handleLogout}>
+      <TouchableOpacity 
+        style={[styles.logoutButton, isCallActive && styles.logoutButtonDisabled]} 
+        onPress={handleLogout}
+      >
         <Icon name="logout" type="material-community" color="#fff" size={20} />
         <Text style={styles.logoutText}>退出登录</Text>
       </TouchableOpacity>
@@ -161,6 +196,9 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     gap: 8,
+  },
+  logoutButtonDisabled: {
+    opacity: 0.6,
   },
   logoutText: {
     fontSize: 16,

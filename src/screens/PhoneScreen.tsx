@@ -2,7 +2,10 @@ import React, { useState } from 'react';
 import { View, Text, TextInput, TouchableOpacity, StyleSheet, ScrollView } from 'react-native';
 import { Icon } from '@rneui/themed';
 import { useNavigation } from '@react-navigation/native';
+import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
+import { RootStackParamList } from '../types/navigation';
 import HistorySummaryModal from '../components/HistorySummaryModal';
+import { useCallStore } from '../store/callStore';
 
 const DIAL_KEYS = [
   ['1', '2', '3'],
@@ -25,7 +28,8 @@ function isValidPhone(phone: string) {
 export default function PhoneScreen() {
   const [phone, setPhone] = useState('');
   const [modalVisible, setModalVisible] = useState(false);
-  const navigation = useNavigation();
+  const navigation = useNavigation<NativeStackNavigationProp<RootStackParamList>>();
+  const startCall = useCallStore(state => state.startCall);
 
   const handleDial = (key: string) => {
     setPhone((prev) => prev + key);
@@ -39,15 +43,22 @@ export default function PhoneScreen() {
     }
   };
 
+  const handleStartCall = async () => {
+    setModalVisible(false);
+    try {
+      await startCall('未知客户', phone);
+      navigation.navigate('CallSession', { phone });
+    } catch (error) {
+      console.error('Failed to start call:', error);
+    }
+  };
+
   return (
     <View style={{flex: 1, backgroundColor: '#fafbfc'}}>
       <HistorySummaryModal
         visible={modalVisible}
         onClose={() => setModalVisible(false)}
-        onConfirm={() => {
-          setModalVisible(false);
-          navigation.navigate('CallSession', { phone });
-        }}
+        onConfirm={handleStartCall}
         phone={phone}
         callCount={3}
       />

@@ -1,7 +1,10 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, ScrollView, Animated } from 'react-native';
 import { Icon } from '@rneui/themed';
-import { useNavigation } from '@react-navigation/native';
+import { useNavigation, useRoute } from '@react-navigation/native';
+import type { NativeStackScreenProps } from '@react-navigation/native-stack';
+import { RootStackParamList } from '../types/navigation';
+import { useCallStore } from '../store/callStore';
 
 const MOCK_TRANSCRIPTS = [
   { role: 'agent', name: '销售', time: '10:00', text: '您好，请问您是想了解本田CRV这款车吗？' },
@@ -55,6 +58,7 @@ const TranscriptItem: React.FC<TranscriptItemProps> = ({ item, onComplete }) => 
   useEffect(() => {
     let currentLength = 0;
     const textLength = item.text.length;
+    
     const interval = setInterval(() => {
       if (currentLength <= textLength) {
         setDisplayText(item.text.slice(0, currentLength));
@@ -81,11 +85,16 @@ const TranscriptItem: React.FC<TranscriptItemProps> = ({ item, onComplete }) => 
   );
 };
 
+type Props = NativeStackScreenProps<RootStackParamList, 'CallSession'>;
+
 export default function CallSessionScreen() {
   const [status, setStatus] = useState<'connecting'|'active'>('connecting');
   const [timer, setTimer] = useState(0);
   const [currentTranscriptIndex, setCurrentTranscriptIndex] = useState(0);
   const navigation = useNavigation();
+  const route = useRoute<Props['route']>();
+  const { phone } = route.params;
+  const { endCall } = useCallStore();
 
   // 背景色动画值
   const bgAnims = useRef(KEY_POINTS.map(() => new Animated.Value(0))).current;
@@ -148,7 +157,8 @@ export default function CallSessionScreen() {
     }
   };
 
-  const handleHangup = () => {
+  const handleHangup = async () => {
+    await endCall();
     navigation.goBack();
   };
 
@@ -156,17 +166,28 @@ export default function CallSessionScreen() {
     <View style={{flex: 1, backgroundColor: '#fafbfc'}}>
       {/* 顶部栏 */}
       <View style={styles.header}>
-        <Text style={styles.phone}>13718193735</Text>
+        <Text style={styles.phone}>{phone}</Text>
         <Text style={styles.statusText}>
           {status === 'connecting' ? '正在连接...' : `通话中 ${formatTime(timer)}`}
         </Text>
       </View>
       {/* 操作按钮区 */}
       <View style={styles.actionRow}>
-        <TouchableOpacity style={styles.actionBtn}>
-          <Icon name="mic" type="feather" color="#222" size={28} />
+        <TouchableOpacity 
+          style={styles.actionBtn}
+          onPress={() => useCallStore.getState().toggleMute()}
+        >
+          <Icon 
+            name={useCallStore.getState().isMuted ? "mic-off" : "mic"} 
+            type="feather" 
+            color="#222" 
+            size={28} 
+          />
         </TouchableOpacity>
-        <TouchableOpacity style={[styles.actionBtn, styles.hangupBtn]} onPress={handleHangup}>
+        <TouchableOpacity 
+          style={[styles.actionBtn, styles.hangupBtn]} 
+          onPress={handleHangup}
+        >
           <Icon name="phone-off" type="feather" color="#fff" size={32} />
         </TouchableOpacity>
         <TouchableOpacity style={styles.actionBtn}>

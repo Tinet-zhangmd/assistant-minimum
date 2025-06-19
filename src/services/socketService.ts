@@ -1,7 +1,7 @@
 import { io, Socket } from 'socket.io-client';
 import { useCallStore } from '../store/callStore';
 
-const SOCKET_URL = 'http://172.16.20.114:3000'; // 替换为您的 Socket.IO 服务器地址
+const SOCKET_URL = 'http://172.16.20.129:3000'; // 替换为您的 Socket.IO 服务器地址
 
 interface MessageData {
   type: 'incomingCall' | 'callAccepted' | 'callEnded' | 'error';
@@ -92,17 +92,19 @@ class SocketService {
   }
 
   // 发起呼叫
-  initiateCall(phoneNumber: string, customerName: string) {
+  initiateCall(phoneNumber: string, customerName: string, channelId: string) {
     if (!this.socket) return;
-    console.log('initiateCall', phoneNumber, customerName);
+      console.log('initiateCall', phoneNumber, customerName, channelId);
     
     this.socket.emit('message', {
       type: 'initiateCall',
       data: {
         phoneNumber,
         customerName,
+        channelId: channelId,
       }
     });
+    
   }
 
   // 接听来电

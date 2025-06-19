@@ -37,9 +37,9 @@ interface CallActions {
 
 const config = {
     appid: 'c4fb2d705dc74c2885d613baecdef2bd',
-    token: '007eJxTYNDb3W/ok8xaznhIL+7X3giVCp6zD7ra1iUusGrUz3UyfqbAkGySlmSUYm5gmpJsbpJsZGFhmmJmaJyUmJqckppmlJRSf8c7oyGQkWFB0UQWRgYIBPH5GYoTc1J1S1KLS3RLMvNSSxgYAF4lIzU=',
+    token: '007eJxTYNgs5Hxlz5t7R1MOphwUkHsieGfjtgs/Vkb23/Gw+bPq+eHjCgzJJmlJRinmBqYpyeYmyUYWFqYpZobGSYmpySmpaUZJKcpfgjMaAhkZ2JUbWRgZIBDE52coTsxJ1S1JLS7RLcnMSy1hYAAAQg8nsA==',
     channelName: 'sale-test-tinet',
-    uid: Math.floor(Math.random() * 100000), 
+    uid: null as number | null, 
 }
 
 const requestMicrophonePermission = async () => {
@@ -120,9 +120,9 @@ export const useCallStore = create<CallState & CallActions>((set, get) => ({
         });
 
         // 添加音量提示的监听
-        engine.addListener('onAudioVolumeIndication', (connection: RtcConnection, speakers: any[], speakerNumber: number, totalVolume: number) => {
-          console.log('Volume indication:', { speakers, speakerNumber, totalVolume });
-        });
+        // engine.addListener('onAudioVolumeIndication', (connection: RtcConnection, speakers: any[], speakerNumber: number, totalVolume: number) => {
+        //   console.log('Volume indication:', { speakers, speakerNumber, totalVolume });
+        // });
 
         set({ engine });
       } catch (error) {
@@ -139,8 +139,28 @@ export const useCallStore = create<CallState & CallActions>((set, get) => ({
     }
 
     try {
+      const uid = parseInt(phoneNumber.slice(-9));
+      config.uid = uid;
       // 通过 Socket.IO 发起呼叫
-      socketService.initiateCall(phoneNumber, customerName);
+
+      // 加入声网频道
+      if (config.uid === null) {
+        throw new Error('uid is null');
+      }
+      console.log('acceptIncomingCall', config.uid, config.channelName, config.token);
+      socketService.initiateCall(config.uid.toString(), customerName, config.channelName);
+
+      await engine?.joinChannel(
+        config.token,
+        config.channelName,
+        config.uid,
+        {
+          clientRoleType: ClientRoleType.ClientRoleBroadcaster,
+          publishMicrophoneTrack: true,
+          enableAudioRecordingOrPlayout: true,
+          autoSubscribeAudio: true,
+        }
+      );
 
       set({
         isCallActive: true,
@@ -203,9 +223,26 @@ export const useCallStore = create<CallState & CallActions>((set, get) => ({
   },
 
   acceptIncomingCall: () => {
-    const { currentCallId } = get();
+    const { currentCallId, engine } = get();
     if (currentCallId) {
       socketService.acceptCall(currentCallId);
+
+      // 加入声网频道
+      if (config.uid === null) {
+        throw new Error('uid is null');
+      }
+      engine?.joinChannel(
+        config.token,
+        config.channelName,
+        config.uid,
+        {
+          clientRoleType: ClientRoleType.ClientRoleBroadcaster,
+          publishMicrophoneTrack: true,
+          enableAudioRecordingOrPlayout: true,
+          autoSubscribeAudio: true,
+        }
+      );
+
       set({
         isCallActive: true,
         isIncomingCall: false,
