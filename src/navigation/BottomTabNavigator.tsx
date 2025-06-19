@@ -4,8 +4,8 @@ import { Icon } from '@rneui/themed';
 import PhoneScreen from '../screens/PhoneScreen';
 import RecordsScreen from '../screens/RecordsScreen';
 import DashboardScreen from '../screens/DashboardScreen';
+import ProfileScreen from '../screens/ProfileScreen';
 // 下面的页面可先用占位组件
-const ProfileScreen = () => <></>;
 
 const Tab = createBottomTabNavigator();
 
