@@ -54,7 +54,7 @@ export default function PhoneScreen() {
   };
 
   return (
-    <View style={{flex: 1, backgroundColor: '#fafbfc'}}>
+    <View style={{flex: 1, backgroundColor: '#fff'}}>
       <HistorySummaryModal
         visible={modalVisible}
         onClose={() => setModalVisible(false)}
@@ -107,13 +107,13 @@ export default function PhoneScreen() {
           <Text style={styles.recentTitle}>最近通话</Text>
           {RECENT_CALLS.map((item) => (
             <View style={styles.recentItem} key={item.number}>
-              <Icon name="phone" type="feather" color="#b0b0b0" size={18} />
-              <View style={{ flex: 1, marginLeft: 8 }}>
+              <Icon name="phone" type="feather" color="#b0b0b0" size={20} style={styles.recentIcon} />
+              <View style={{ flex: 1 }}>
                 <Text style={styles.recentNumber}>{item.number}</Text>
                 <Text style={styles.recentTime}>{item.time}</Text>
               </View>
               <View style={[styles.statusTag, item.status === '已接通' ? styles.statusSuccess : styles.statusFail]}>
-                <Text style={styles.statusText}>{item.status}</Text>
+                <Text style={[styles.statusText, item.status === '未接通' ? styles.statusTextFail : {}]}>{item.status}</Text>
               </View>
             </View>
           ))}
@@ -125,17 +125,17 @@ export default function PhoneScreen() {
 
 const styles = StyleSheet.create({
   titleBar: {
-    backgroundColor: '#2979ff',
+    backgroundColor: '#2563ef',
     paddingTop: 0,
     paddingBottom: 0,
-    height: 56,
+    height: 60,
     justifyContent: 'center',
     alignItems: 'center',
   },
   title: {
     color: '#fff',
-    fontSize: 22,
-    fontWeight: 'bold',
+    fontSize: 18,
+    fontWeight: 600,
     textAlign: 'center',
   },
   label: {
@@ -147,12 +147,12 @@ const styles = StyleSheet.create({
   },
   input: {
     marginHorizontal: 16,
-    borderWidth: 2,
-    borderColor: '#e0e3e7',
+    borderWidth: 1,
+    borderColor: '#e2e8f0',
     borderRadius: 12,
     backgroundColor: '#fff',
-    fontSize: 22,
-    color: '#333',
+    fontSize: 18,
+    color: 'rgb(2, 8, 23)',
     padding: 12,
     textAlign: 'center',
     marginBottom: 16,
@@ -172,21 +172,23 @@ const styles = StyleSheet.create({
     backgroundColor: '#fff',
     borderRadius: 12,
     borderWidth: 1,
-    borderColor: '#e0e3e7',
+    borderColor: '#e2e8f0',
     alignItems: 'center',
     justifyContent: 'center',
     height: 64,
   },
   dialKeyText: {
-    fontSize: 28,
-    color: '#222',
-    fontWeight: '500',
+    fontSize: 20,
+    color: 'rgb(2, 8, 23)',
+    fontWeight: '600',
   },
   actionRow: {
     flexDirection: 'row',
-    justifyContent: 'space-between',
+    justifyContent: 'center',
+    alignItems: 'center',
     marginHorizontal: 16,
     marginBottom: 12,
+    width: '80%',
   },
   clearBtn: {
     flex: 1,
@@ -227,37 +229,43 @@ const styles = StyleSheet.create({
     margin: 16,
     borderRadius: 12,
     padding: 16,
-    shadowColor: '#000',
-    shadowOpacity: 0.04,
-    shadowRadius: 4,
+    shadowColor: '#e2e8f0',
+    shadowOpacity: 0.01,
+    shadowRadius: 8,
+    shadowOffset: { width: 0, height: 2 },
     elevation: 2,
+    borderWidth: 1,
+    borderColor: '#e2e8f0',
   },
   recentTitle: {
-    fontSize: 17,
+    fontSize: 18,
     fontWeight: 'bold',
-    color: '#222',
-    marginBottom: 12,
+    color: '#000',
+    marginBottom: 16,
   },
   recentItem: {
     flexDirection: 'row',
     alignItems: 'center',
-    marginBottom: 14,
+    marginBottom: 20,
+  },
+  recentIcon: {
+    marginRight: 12,
   },
   recentNumber: {
-    fontSize: 17,
-    color: '#111',
-    fontWeight: '500',
+    fontSize: 16,
+    color: '#000',
+    fontWeight: '600',
   },
   recentTime: {
     fontSize: 14,
-    color: '#888',
-    marginTop: 2,
+    color: '#666',
+    marginTop: 4,
   },
   statusTag: {
     borderRadius: 16,
     paddingHorizontal: 12,
     paddingVertical: 4,
-    minWidth: 56,
+    minWidth: 64,
     alignItems: 'center',
     justifyContent: 'center',
   },
@@ -269,7 +277,10 @@ const styles = StyleSheet.create({
   },
   statusText: {
     color: '#fff',
-    fontSize: 15,
-    fontWeight: 'bold',
+    fontSize: 14,
+    fontWeight: '500',
+  },
+  statusTextFail: {
+    color: '#111827',
   },
 }); 

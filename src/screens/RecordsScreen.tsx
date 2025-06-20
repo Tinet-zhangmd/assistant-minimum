@@ -433,9 +433,9 @@ const styles = StyleSheet.create({
     fontWeight: '400',
   },
   filterLabel: {
-    fontSize: 16,
-    color: '#222',
-    fontWeight: 'bold',
+    fontSize: 14,
+    color: '#374151',
+    fontWeight: 500,
     marginBottom: 4,
     marginLeft: 4,
   },

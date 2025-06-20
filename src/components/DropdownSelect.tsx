@@ -107,8 +107,8 @@ const styles = StyleSheet.create({
   dropdownBox: {
     flexDirection: 'row',
     alignItems: 'center',
-    borderWidth: 2,
-    borderColor: '#e0e3e7',
+    borderWidth: 1,
+    borderColor: '#e2e8f0',
     borderRadius: 8,
     backgroundColor: '#fff',
     paddingHorizontal: 16,
