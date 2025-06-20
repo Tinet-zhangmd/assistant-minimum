@@ -1,7 +1,7 @@
 import { io, Socket } from 'socket.io-client';
 import { useCallStore } from '../store/callStore';
 
-const SOCKET_URL = 'http://172.16.20.129:3000'; // 替换为您的 Socket.IO 服务器地址
+const SOCKET_URL = 'https://sale-test.clink.cn:3000'; // 替换为您的 Socket.IO 服务器地址
 
 interface MessageData {
   type: 'incomingCall' | 'callAccepted' | 'callEnded' | 'error';
