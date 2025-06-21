@@ -8,9 +8,9 @@ import type { CallRecord } from '../types/callRecord';
 const MOCK_DETAIL: CallRecord = {
   id: 1000,
   phone: '138****1000',
-  callTime: '2025/6/19 11:55:13',
+  callTime: '2025/6/20 17:11:22',
   status: '已接通',
-  duration: 293,
+  duration: 57,
   recordingUrl: 'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3',
 };
 const MOCK_TRANSCRIPT = [
@@ -46,22 +46,16 @@ const TABS = [
 ];
 
 function formatDuration(sec: number) {
-  if (!sec) return '0秒';
+  if (!sec) return '0分0秒';
   const m = Math.floor(sec / 60);
   const s = sec % 60;
-  return m ? `${m}分${s}秒` : `${s}秒`;
+  return `${m}分${s}秒`;
 }
 
 interface Props {
   record: CallRecord;
   onClose: () => void;
 }
-
-const windowHeight = Dimensions.get('window').height;
-const cardTopRadius = 24;
-const cardMarginBottom = 24;
-const cardMarginHorizontal = 8;
-const cardInset = 8;
 
 const CallRecordDetailModal: React.FC<Props> = ({ record, onClose }) => {
   const [tab, setTab] = useState('transcript');
@@ -104,25 +98,25 @@ const CallRecordDetailModal: React.FC<Props> = ({ record, onClose }) => {
   if (record.status === '未接通') {
     return (
       <View style={styles.modalRoot}>
-        {/* 顶部蓝色栏，独立一层 */}
+        {/* 顶部蓝色栏 */}
         <View style={styles.topBar}>
           <Text style={styles.topBarTitle}>通话详情</Text>
           <TouchableOpacity style={styles.closeBtn} onPress={onClose}>
-            <Icon name="x" type="feather" color="#fff" size={28} />
+            <Icon name="x" type="feather" color="#fff" size={24} />
           </TouchableOpacity>
         </View>
-        {/* 白色内容卡片，带圆角和阴影，嵌入蓝色栏下方 */}
-        <View style={styles.cardBox}>
-          <View style={styles.cardHeaderRow}>
+        
+        <View style={styles.contentContainer}>
+          <View style={styles.headerSection}>
             <View>
               <Text style={styles.phone}>{record.phone}</Text>
               <Text style={styles.time}>{record.callTime}</Text>
-              <Text style={styles.duration}>通话时长: {formatDuration(record.duration)}</Text>
             </View>
             <View style={[styles.statusTag, styles.statusFail]}>
               <Text style={styles.statusTextFail}>未接通</Text>
             </View>
           </View>
+          
           <View style={styles.emptyBox}>
             <Text style={styles.emptyTitle}>未接通通话</Text>
             <Text style={styles.emptyText}>暂无通话内容</Text>
@@ -135,16 +129,16 @@ const CallRecordDetailModal: React.FC<Props> = ({ record, onClose }) => {
   // 已接通情况
   return (
     <View style={styles.modalRoot}>
-      {/* 顶部蓝色栏，独立一层 */}
+      {/* 顶部蓝色栏 */}
       <View style={styles.topBar}>
         <Text style={styles.topBarTitle}>通话详情</Text>
         <TouchableOpacity style={styles.closeBtn} onPress={onClose}>
-          <Icon name="x" type="feather" color="#fff" size={28} />
+          <Icon name="x" type="feather" color="#fff" size={24} />
         </TouchableOpacity>
       </View>
-      {/* 白色内容卡片，带圆角和阴影，嵌入蓝色栏下方 */}
-      <View style={styles.cardBox}>
-        <View style={styles.cardHeaderRow}>
+      
+      <View style={styles.contentContainer}>
+        <View style={styles.headerSection}>
           <View>
             <Text style={styles.phone}>{record.phone}</Text>
             <Text style={styles.time}>{record.callTime}</Text>
@@ -154,14 +148,16 @@ const CallRecordDetailModal: React.FC<Props> = ({ record, onClose }) => {
             <Text style={styles.statusTextSuccess}>已接通</Text>
           </View>
         </View>
+        
         <View style={styles.actionRow}>
-          <TouchableOpacity style={styles.iconBtn} onPress={handlePlay}>
-            <Icon name={playing ? 'pause' : 'play'} type="feather" color="#2979ff" size={28} />
+          <TouchableOpacity style={styles.actionButton} onPress={handlePlay}>
+            <Icon name={playing ? 'pause' : 'play'} type="feather" color="#000" size={22} />
           </TouchableOpacity>
-          <TouchableOpacity style={styles.iconBtn} onPress={handleDownload}>
-            <Icon name="download" type="feather" color="#2979ff" size={28} />
+          <TouchableOpacity style={styles.actionButton} onPress={handleDownload}>
+            <Icon name="download" type="feather" color="#000" size={22} />
           </TouchableOpacity>
         </View>
+        
         {/* Tabs */}
         <View style={styles.tabBar}>
           {TABS.map(t => (
@@ -171,11 +167,13 @@ const CallRecordDetailModal: React.FC<Props> = ({ record, onClose }) => {
               onPress={() => setTab(t.key)}
             >
               <Text style={[styles.tabText, tab === t.key && styles.tabTextActive]}>{t.label}</Text>
+              {tab === t.key && <View style={styles.tabIndicator} />}
             </TouchableOpacity>
           ))}
         </View>
+        
         {/* 内容区 */}
-        <ScrollView style={{ flex: 1 }} contentContainerStyle={styles.contentScroll}>
+        <ScrollView style={styles.scrollContainer} contentContainerStyle={styles.contentScroll}>
           {tab === 'transcript' && (
             <View>
               <Text style={styles.sectionTitle}>对话记录</Text>
@@ -184,8 +182,12 @@ const CallRecordDetailModal: React.FC<Props> = ({ record, onClose }) => {
                   key={idx}
                   style={[styles.bubble, item.role === 'agent' ? styles.bubbleAgent : styles.bubbleCustomer]}
                 >
-                  <Text style={styles.bubbleName}>{item.name} {item.time}</Text>
-                  <Text style={styles.bubbleText}>{item.text}</Text>
+                  <Text style={[styles.bubbleName, item.role === 'agent' ? styles.bubbleNameAgent : styles.bubbleNameCustomer]}>
+                    {item.role === 'agent' ? '坐席' : '客户'} {item.time}
+                  </Text>
+                  <Text style={[styles.bubbleText, item.role === 'agent' ? styles.bubbleTextAgent : styles.bubbleTextCustomer]}>
+                    {item.text}
+                  </Text>
                 </View>
               ))}
             </View>
@@ -234,245 +236,228 @@ const CallRecordDetailModal: React.FC<Props> = ({ record, onClose }) => {
 const styles = StyleSheet.create({
   modalRoot: {
     flex: 1,
-    backgroundColor: 'rgba(0,0,0,0.18)',
-    justifyContent: 'flex-end',
-    alignItems: 'center',
+    backgroundColor: '#fff',
   },
   topBar: {
-    width: '98%',
-    height: 64,
-    backgroundColor: '#2979ff',
-    borderTopLeftRadius: cardTopRadius,
-    borderTopRightRadius: cardTopRadius,
-    flexDirection: 'row',
-    alignItems: 'center',
-    paddingHorizontal: 20,
-    zIndex: 2,
-    marginBottom: -cardTopRadius + cardInset, // 让白色卡片嵌入蓝色栏
-    alignSelf: 'center',
-    shadowColor: 'transparent', // 不要阴影
-  },
-  topBarTitle: {
-    color: '#fff',
-    fontSize: 22,
-    fontWeight: 'bold',
-    flex: 1,
-    textAlign: 'left',
-  },
-  closeBtn: {
-    padding: 8,
-    marginLeft: 8,
-  },
-  cardBox: {
-    width: '98%',
-    backgroundColor: '#fff',
-    borderRadius: cardTopRadius,
-    shadowColor: '#000',
-    shadowOpacity: 0.10,
-    shadowRadius: 16,
-    elevation: 12,
-    overflow: 'hidden',
-    minHeight: windowHeight * 0.7,
-    maxHeight: windowHeight * 0.95,
-    paddingTop: cardTopRadius - cardInset, // 顶部内边距让内容不被圆角遮挡
-    marginBottom: cardMarginBottom,
-    marginHorizontal: cardMarginHorizontal,
-    alignSelf: 'center',
-  },
-  cardHeaderRow: {
+    height: 56,
+    backgroundColor: '#1677ff',
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    marginBottom: 8,
-    marginTop: 10,
-    paddingHorizontal: 4,
+    paddingHorizontal: 16,
+  },
+  topBarTitle: {
+    color: '#fff',
+    fontSize: 18,
+    fontWeight: '600',
+  },
+  closeBtn: {
+    padding: 4,
+  },
+  contentContainer: {
+    flex: 1,
+    backgroundColor: '#fff',
+  },
+  headerSection: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'flex-start',
+    paddingHorizontal: 16,
+    paddingVertical: 16,
   },
   phone: {
-    fontSize: 20,
+    fontSize: 18,
     fontWeight: 'bold',
-    color: '#222',
-    marginBottom: 2,
+    color: '#000',
+    marginBottom: 4,
   },
   time: {
-    fontSize: 15,
-    color: '#888',
-    marginBottom: 2,
+    fontSize: 14,
+    color: '#666',
+    marginBottom: 4,
   },
   duration: {
-    fontSize: 15,
-    color: '#888',
-    marginBottom: 2,
+    fontSize: 14,
+    color: '#666',
   },
   statusTag: {
     borderRadius: 16,
-    paddingHorizontal: 16,
-    paddingVertical: 6,
+    paddingHorizontal: 12,
+    paddingVertical: 4,
     minWidth: 64,
     alignItems: 'center',
-    justifyContent: 'center',
   },
   statusSuccess: {
     backgroundColor: '#111827',
   },
   statusFail: {
-    backgroundColor: '#f1f3f6',
+    backgroundColor: '#f5f5f5',
+    borderWidth: 1,
+    borderColor: '#e0e0e0',
   },
   statusTextSuccess: {
     color: '#fff',
-    fontSize: 15,
-    fontWeight: 'bold',
+    fontSize: 13,
+    fontWeight: '500',
   },
   statusTextFail: {
-    color: '#222',
-    fontSize: 15,
-    fontWeight: 'bold',
+    color: '#333',
+    fontSize: 13,
+    fontWeight: '500',
   },
   actionRow: {
     flexDirection: 'row',
-    alignItems: 'center',
-    marginTop: 12,
-    marginBottom: 8,
-    paddingHorizontal: 4,
+    paddingHorizontal: 16,
+    marginBottom: 16,
   },
-  iconBtn: {
-    width: 44,
-    height: 44,
-    borderRadius: 12,
-    backgroundColor: '#f6f8fa',
-    alignItems: 'center',
-    justifyContent: 'center',
-    marginRight: 12,
+  actionButton: {
+    width: 48,
+    height: 48,
+    backgroundColor: '#fff',
     borderWidth: 1,
-    borderColor: '#e0e3e7',
+    borderColor: '#e0e0e0',
+    borderRadius: 8,
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginRight: 16,
   },
   tabBar: {
     flexDirection: 'row',
-    backgroundColor: '#f6f8fa',
-    borderRadius: 12,
-    marginTop: 10,
-    marginBottom: 8,
-    overflow: 'hidden',
-    marginHorizontal: 0,
+    borderBottomWidth: 1,
+    borderBottomColor: '#eeeeee',
+    backgroundColor: '#fff',
+    justifyContent: 'space-around',
   },
   tabItem: {
+    paddingVertical: 14,
+    paddingHorizontal: 12,
+    position: 'relative',
     flex: 1,
-    alignItems: 'center',
-    paddingVertical: 12,
-    backgroundColor: '#f6f8fa',
   },
   tabActive: {
-    backgroundColor: '#fff',
-    borderTopLeftRadius: 8,
-    borderTopRightRadius: 8,
-    borderBottomWidth: 0,
-    shadowColor: '#000',
-    shadowOpacity: 0.04,
-    shadowRadius: 2,
-    elevation: 1,
+    position: 'relative',
+  },
+  tabIndicator: {
+    position: 'absolute',
+    bottom: -1,
+    left: 0,
+    right: 0,
+    height: 2,
+    backgroundColor: '#1677ff',
   },
   tabText: {
-    fontSize: 16,
-    color: '#888',
-    fontWeight: 'bold',
+    fontSize: 14,
+    color: '#666',
+    textAlign: 'center',
   },
   tabTextActive: {
-    color: '#2979ff',
+    color: '#1677ff',
+    fontWeight: '500',
   },
-  sectionTitle: {
-    fontSize: 17,
-    fontWeight: 'bold',
-    color: '#222',
-    marginBottom: 12,
+  scrollContainer: {
+    flex: 1,
   },
   contentScroll: {
+    padding: 16,
     paddingBottom: 32,
-    minHeight: 200,
-    paddingHorizontal: 0,
+  },
+  sectionTitle: {
+    fontSize: 16,
+    fontWeight: 'bold',
+    color: '#333',
+    marginBottom: 16,
   },
   bubble: {
+    padding: 16,
     borderRadius: 12,
-    padding: 12,
-    marginBottom: 12,
-    maxWidth: '90%',
+    marginBottom: 16,
+    maxWidth: '85%',
   },
   bubbleAgent: {
-    backgroundColor: '#2979ff',
+    backgroundColor: '#1677ff',
     alignSelf: 'flex-end',
   },
   bubbleCustomer: {
-    backgroundColor: '#f6f8fa',
+    backgroundColor: '#f0f0f0',
     alignSelf: 'flex-start',
   },
   bubbleName: {
-    fontSize: 13,
-    color: '#888',
-    marginBottom: 2,
+    fontSize: 14,
+    marginBottom: 6,
+    fontWeight: '500',
+  },
+  bubbleNameAgent: {
+    color: 'rgba(255, 255, 255, 0.9)',
+  },
+  bubbleNameCustomer: {
+    color: '#666',
   },
   bubbleText: {
     fontSize: 16,
-    color: '#222',
+    lineHeight: 24,
+    fontWeight: '400',
+  },
+  bubbleTextAgent: {
+    color: '#fff',
+  },
+  bubbleTextCustomer: {
+    color: '#333',
+  },
+  emptyBox: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  emptyTitle: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    color: '#333',
+    marginBottom: 8,
+  },
+  emptyText: {
+    fontSize: 14,
+    color: '#666',
   },
   profileRow: {
     flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    backgroundColor: '#fff',
+    paddingVertical: 12,
     borderBottomWidth: 1,
     borderBottomColor: '#f0f0f0',
-    paddingVertical: 14,
-    paddingHorizontal: 0,
   },
   profileKey: {
-    color: '#888',
-    fontSize: 16,
+    width: 80,
+    fontSize: 14,
+    color: '#666',
   },
   profileValue: {
-    color: '#222',
-    fontSize: 16,
-    fontWeight: 'bold',
+    flex: 1,
+    fontSize: 14,
+    color: '#333',
   },
   tagRow: {
     flexDirection: 'row',
     flexWrap: 'wrap',
-    marginBottom: 8,
+    marginBottom: 16,
   },
   tag: {
-    backgroundColor: '#f6f8fa',
-    color: '#222',
-    fontSize: 15,
-    borderRadius: 16,
-    paddingHorizontal: 14,
+    backgroundColor: '#f0f0f0',
+    paddingHorizontal: 12,
     paddingVertical: 6,
-    marginRight: 10,
-    marginBottom: 10,
-    fontWeight: 'bold',
+    borderRadius: 16,
+    marginRight: 8,
+    marginBottom: 8,
+    fontSize: 14,
+    color: '#333',
   },
   summaryBox: {
-    backgroundColor: '#f6f8fa',
-    borderRadius: 12,
-    padding: 18,
-    borderWidth: 1,
-    borderColor: '#e0e3e7',
-    marginTop: 8,
+    backgroundColor: '#f9f9f9',
+    padding: 16,
+    borderRadius: 8,
   },
   summaryText: {
-    fontSize: 16,
-    color: '#222',
-    lineHeight: 24,
-  },
-  emptyBox: {
-    marginTop: 60,
-    alignItems: 'center',
-  },
-  emptyTitle: {
-    fontSize: 22,
-    color: '#888',
-    fontWeight: 'bold',
-    marginBottom: 8,
-  },
-  emptyText: {
-    fontSize: 16,
-    color: '#888',
+    fontSize: 14,
+    lineHeight: 22,
+    color: '#333',
   },
 });
 

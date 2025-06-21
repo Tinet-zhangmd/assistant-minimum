@@ -20,10 +20,10 @@ const DURATION_OPTIONS: DropdownOption[] = [
 ];
 
 function formatDuration(sec: number) {
-  if (!sec) return '--';
+  if (!sec) return '';
   const m = Math.floor(sec / 60);
   const s = sec % 60;
-  return `${m}:${s.toString().padStart(2, '0')}`;
+  return `${m}分${s}秒`;
 }
 
 const PAGE_SIZE = 20;
@@ -103,22 +103,27 @@ export default function RecordsScreen() {
   const renderItem = ({ item }: { item: CallRecord }) => (
     <TouchableOpacity style={styles.card} onPress={() => handleRecordPress(item)}>
       <View style={styles.cardLeft}>
-        <View style={styles.iconCircle}>
-          <Icon name="phone" type="feather" color="#2979ff" size={28} />
-        </View>
+        <Icon name="phone" type="feather" color="#1677ff" size={24} />
       </View>
       <View style={styles.cardMid}>
         <Text style={styles.phone}>{item.phone}</Text>
-        <View style={{ flexDirection: 'row', alignItems: 'center', marginTop: 4 }}>
-          <Icon name="clock" type="feather" color="#b0b0b0" size={16} />
+        <View style={styles.timeContainer}>
+          <Icon name="clock" type="feather" color="#999" size={14} style={{marginRight: 4}} />
           <Text style={styles.time}>{item.callTime}</Text>
         </View>
       </View>
       <View style={styles.cardRight}>
         <View style={[styles.statusTag, item.status === '已接通' ? styles.statusSuccess : styles.statusFail]}>
-          <Text style={item.status === '已接通' ? styles.statusTextSuccess : styles.statusTextFail}>{item.status}</Text>
+          <Text style={[styles.statusText, item.status === '已接通' ? styles.statusTextSuccess : styles.statusTextFail]}>
+            {item.status}
+          </Text>
         </View>
-        <Text style={styles.arrow}>&gt;</Text>
+        {item.status === '已接通' && item.duration > 0 && (
+          <Text style={styles.durationText}>{formatDuration(item.duration)}</Text>
+        )}
+      </View>
+      <View style={styles.arrowContainer}>
+        <Icon name="chevron-right" type="feather" color="#ccc" size={20} />
       </View>
     </TouchableOpacity>
   );
@@ -132,7 +137,7 @@ export default function RecordsScreen() {
   });
 
   return (
-    <View style={{ flex: 1, backgroundColor: '#f6f8fa' }}>
+    <View style={{ flex: 1, backgroundColor: '#fff' }}>
       {/* 顶部蓝色栏 */}
       <View style={styles.headerBar}>
         <Text style={styles.headerTitle}>通话记录</Text>
@@ -223,15 +228,15 @@ export default function RecordsScreen() {
 const styles = StyleSheet.create({
   headerBar: {
     backgroundColor: '#2979ff',
-    height: 80,
-    justifyContent: 'flex-end',
+    height: 60,
+    justifyContent: 'center',
     alignItems: 'center',
-    paddingBottom: 12,
   },
   headerTitle: {
     color: '#fff',
-    fontSize: 24,
-    fontWeight: 'bold',
+    fontSize: 18,
+    fontWeight: 600,
+    textAlign: 'center',
   },
   statsRow: {
     flexDirection: 'row',
@@ -297,75 +302,86 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
   },
   card: {
+    backgroundColor: '#fff',
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: '#fff',
-    borderRadius: 12,
-    marginHorizontal: 12,
-    marginTop: 12,
-    padding: 16,
-    shadowColor: '#000',
-    shadowOpacity: 0.04,
-    shadowRadius: 4,
-    elevation: 2,
+    paddingVertical: 20,
+    paddingHorizontal: 16,
+    borderBottomWidth: StyleSheet.hairlineWidth,
+    borderBottomColor: '#e0e0e0',
   },
   cardLeft: {
-    marginRight: 12,
-  },
-  iconCircle: {
-    width: 44,
-    height: 44,
-    borderRadius: 22,
-    backgroundColor: '#e6f0ff',
+    width: 48,
+    height: 48,
+    borderRadius: 24,
+    backgroundColor: '#e6f7ff',
     justifyContent: 'center',
     alignItems: 'center',
+    marginRight: 12,
   },
   cardMid: {
     flex: 1,
+    justifyContent: 'center',
   },
   phone: {
-    fontSize: 18,
-    fontWeight: 'bold',
-    color: '#222',
+    fontSize: 16,
+    fontWeight: '600',
+    color: '#000',
+    marginBottom: 4,
+  },
+  timeContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
   },
   time: {
     fontSize: 14,
-    color: '#888',
-    marginLeft: 4,
+    color: '#666',
   },
   cardRight: {
     alignItems: 'flex-end',
+    flexDirection: 'column',
     justifyContent: 'center',
+    minWidth: 80,
+    marginRight: 0,
+  },
+  arrowContainer: {
+    justifyContent: 'center',
+    alignItems: 'center',
+    paddingLeft: 8,
   },
   statusTag: {
     borderRadius: 16,
     paddingHorizontal: 12,
     paddingVertical: 4,
-    minWidth: 56,
+    marginBottom: 6,
+    alignSelf: 'flex-end',
+    minWidth: 64,
     alignItems: 'center',
-    justifyContent: 'center',
-    marginBottom: 8,
   },
   statusSuccess: {
-    backgroundColor: '#2979ff',
+    backgroundColor: '#111827',
   },
   statusFail: {
-    backgroundColor: '#f1f3f6',
+    backgroundColor: '#f5f5f5',
+    borderWidth: 1,
+    borderColor: '#e0e0e0',
+  },
+  statusText: {
+    fontSize: 13,
+    fontWeight: '500',
   },
   statusTextSuccess: {
     color: '#fff',
-    fontSize: 15,
-    fontWeight: 'bold',
   },
   statusTextFail: {
-    color: '#222',
-    fontSize: 15,
-    fontWeight: 'bold',
+    color: '#333',
   },
-  arrow: {
-    color: '#b0b0b0',
-    fontSize: 22,
-    fontWeight: 'bold',
+  durationText: {
+    fontSize: 14,
+    color: '#666',
+    textAlign: 'right',
+    alignSelf: 'flex-end',
+    marginTop: 2,
   },
   pageBar: {
     flexDirection: 'row',
@@ -374,8 +390,6 @@ const styles = StyleSheet.create({
     backgroundColor: '#fff',
     paddingHorizontal: 16,
     paddingVertical: 10,
-    borderTopWidth: 1,
-    borderTopColor: '#f0f0f0',
   },
   pageBtn: {
     paddingHorizontal: 12,
