@@ -121,6 +121,111 @@ android {
         jniLibs {
             useLegacyPackaging (findProperty('expo.useLegacyPackaging')?.toBoolean() ?: false)
         }
+        
+        // 排除声网不需要的插件以减小包体积
+        // 由于只需要实时语音通话功能，排除所有视频、AI、美颜等插件
+        
+        // AI 降噪插件 (AI Noise Suppression)
+        exclude 'lib/armeabi-v7a/libagora_ai_denoise_extension.so'
+        exclude 'lib/arm64-v8a/libagora_ai_denoise_extension.so'
+        exclude 'lib/x86/libagora_ai_denoise_extension.so'
+        exclude 'lib/x86_64/libagora_ai_denoise_extension.so'
+        
+        // AI 回声消除插件 (AI Echo Cancellation)
+        exclude 'lib/armeabi-v7a/libagora_ai_echo_cancellation_extension.so'
+        exclude 'lib/arm64-v8a/libagora_ai_echo_cancellation_extension.so'
+        exclude 'lib/x86/libagora_ai_echo_cancellation_extension.so'
+        exclude 'lib/x86_64/libagora_ai_echo_cancellation_extension.so'
+        
+        // 音频美颜插件 (Audio Beauty)
+        exclude 'lib/armeabi-v7a/libagora_audio_beauty_extension.so'
+        exclude 'lib/arm64-v8a/libagora_audio_beauty_extension.so'
+        exclude 'lib/x86/libagora_audio_beauty_extension.so'
+        exclude 'lib/x86_64/libagora_audio_beauty_extension.so'
+        
+        // 画质增强插件 (Clear Vision)
+        exclude 'lib/armeabi-v7a/libagora_clear_vision_extension.so'
+        exclude 'lib/arm64-v8a/libagora_clear_vision_extension.so'
+        exclude 'lib/x86/libagora_clear_vision_extension.so'
+        exclude 'lib/x86_64/libagora_clear_vision_extension.so'
+        
+        // 内容审核插件 (Content Inspect)
+        exclude 'lib/armeabi-v7a/libagora_content_inspect_extension.so'
+        exclude 'lib/arm64-v8a/libagora_content_inspect_extension.so'
+        exclude 'lib/x86/libagora_content_inspect_extension.so'
+        exclude 'lib/x86_64/libagora_content_inspect_extension.so'
+        
+        // 屏幕共享插件 (Screen Capture)
+        exclude 'lib/armeabi-v7a/libagora_screen_capture_extension.so'
+        exclude 'lib/arm64-v8a/libagora_screen_capture_extension.so'
+        exclude 'lib/x86/libagora_screen_capture_extension.so'
+        exclude 'lib/x86_64/libagora_screen_capture_extension.so'
+        
+        // 空间音频插件 (Spatial Audio)
+        exclude 'lib/armeabi-v7a/libagora_spatial_audio_extension.so'
+        exclude 'lib/arm64-v8a/libagora_spatial_audio_extension.so'
+        exclude 'lib/x86/libagora_spatial_audio_extension.so'
+        exclude 'lib/x86_64/libagora_spatial_audio_extension.so'
+        
+        // 超分辨率插件 (Super Resolution)
+        exclude 'lib/armeabi-v7a/libagora_super_resolution_extension.so'
+        exclude 'lib/arm64-v8a/libagora_super_resolution_extension.so'
+        exclude 'lib/x86/libagora_super_resolution_extension.so'
+        exclude 'lib/x86_64/libagora_super_resolution_extension.so'
+        
+        // 视频质量分析插件 (Video Quality Analyzer)
+        exclude 'lib/armeabi-v7a/libagora_video_quality_analyzer_extension.so'
+        exclude 'lib/arm64-v8a/libagora_video_quality_analyzer_extension.so'
+        exclude 'lib/x86/libagora_video_quality_analyzer_extension.so'
+        exclude 'lib/x86_64/libagora_video_quality_analyzer_extension.so'
+        
+        // 虚拟背景插件 (Virtual Background)
+        exclude 'lib/armeabi-v7a/libagora_virtual_background_extension.so'
+        exclude 'lib/arm64-v8a/libagora_virtual_background_extension.so'
+        exclude 'lib/x86/libagora_virtual_background_extension.so'
+        exclude 'lib/x86_64/libagora_virtual_background_extension.so'
+        
+        // 人脸检测插件 (Face Detection)
+        exclude 'lib/armeabi-v7a/libagora_face_detect_extension.so'
+        exclude 'lib/arm64-v8a/libagora_face_detect_extension.so'
+        exclude 'lib/x86/libagora_face_detect_extension.so'
+        exclude 'lib/x86_64/libagora_face_detect_extension.so'
+        
+        // 人脸捕获插件 (Face Capture)
+        exclude 'lib/armeabi-v7a/libagora_face_capture_extension.so'
+        exclude 'lib/arm64-v8a/libagora_face_capture_extension.so'
+        exclude 'lib/x86/libagora_face_capture_extension.so'
+        exclude 'lib/x86_64/libagora_face_capture_extension.so'
+        
+        // 视频编码插件 (Video Encoder)
+        exclude 'lib/armeabi-v7a/libagora_video_encoder_extension.so'
+        exclude 'lib/arm64-v8a/libagora_video_encoder_extension.so'
+        exclude 'lib/x86/libagora_video_encoder_extension.so'
+        exclude 'lib/x86_64/libagora_video_encoder_extension.so'
+        
+        // 视频解码插件 (Video Decoder)
+        exclude 'lib/armeabi-v7a/libagora_video_decoder_extension.so'
+        exclude 'lib/arm64-v8a/libagora_video_decoder_extension.so'
+        exclude 'lib/x86/libagora_video_decoder_extension.so'
+        exclude 'lib/x86_64/libagora_video_decoder_extension.so'
+        
+        // AV1 编码插件 (AV1 Encoder)
+        exclude 'lib/armeabi-v7a/libagora_video_av1_encoder_extension.so'
+        exclude 'lib/arm64-v8a/libagora_video_av1_encoder_extension.so'
+        exclude 'lib/x86/libagora_video_av1_encoder_extension.so'
+        exclude 'lib/x86_64/libagora_video_av1_encoder_extension.so'
+        
+        // AV1 解码插件 (AV1 Decoder)
+        exclude 'lib/armeabi-v7a/libagora_video_av1_decoder_extension.so'
+        exclude 'lib/arm64-v8a/libagora_video_av1_decoder_extension.so'
+        exclude 'lib/x86/libagora_video_av1_decoder_extension.so'
+        exclude 'lib/x86_64/libagora_video_av1_decoder_extension.so'
+        
+        // 语音驱动插件 (Lip Sync)
+        exclude 'lib/armeabi-v7a/libagora_lip_sync_extension.so'
+        exclude 'lib/arm64-v8a/libagora_lip_sync_extension.so'
+        exclude 'lib/x86/libagora_lip_sync_extension.so'
+        exclude 'lib/x86_64/libagora_lip_sync_extension.so'
     }
     androidResources {
         ignoreAssetsPattern '!.svn:!.git:!.ds_store:!*.scc:!CVS:!thumbs.db:!picasa.ini:!*~'

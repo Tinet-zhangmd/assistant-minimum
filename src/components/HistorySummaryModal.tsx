@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, ScrollView } from 'react-native';
-import { Overlay, Button, Icon } from 'react-native-elements';
+import { Overlay, Button, Icon } from '@rneui/themed';
 
 // mock数据
 type CustomerProfile = {
